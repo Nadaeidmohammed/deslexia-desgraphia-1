@@ -54,7 +54,7 @@ export class Conversation extends Model<Conversation> {
   @ForeignKey(() => Child)
   @Column({
     type: DataType.INTEGER,
-    allowNull: false,
+    allowNull: true, 
   })
   childId: number;
 
@@ -68,7 +68,7 @@ export class Conversation extends Model<Conversation> {
   user: User;
 
   @BelongsTo(() => Child, {
-    onDelete: 'CASCADE',
+    onDelete: 'SET NULL', 
     onUpdate: 'CASCADE',
   })
   child: Child;
@@ -79,3 +79,5 @@ export class Conversation extends Model<Conversation> {
   @HasOne(() => Message)
   lastMessage: Message;
 }
+
+
