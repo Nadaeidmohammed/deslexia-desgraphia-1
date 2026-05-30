@@ -8,10 +8,6 @@ import {
   Delete,
   Param,
   ParseIntPipe,
-  UseInterceptors,
-  UploadedFile,
-  Req,
-  BadRequestException,
 } from '@nestjs/common';
 import { CreateChildDto } from '../dto/create-child.dto';
 import { UpdateChildDto } from '../dto';
@@ -21,7 +17,6 @@ import {
   ApiTags,
   ApiBearerAuth,
   ApiOperation,
-  ApiResponse,
 } from '@nestjs/swagger';
 import { ChildrenService } from '../services/child.service';
 import { FileInterceptor } from '@nestjs/platform-express';
@@ -29,16 +24,14 @@ import { diskStorage } from 'multer';
 import { extname } from 'path';
 
 @ApiTags('Children')
-// @ApiBearerAuth()
-// @UseGuards(JwtAuthGuard)
 @Controller('api/children')
 @ApiTags('Children')
-@Controller('api/children') // شيلنا الـ Guard والـ ApiBearerAuth من هنا عشان الكنترولر يفتح معاكِ
+@Controller('api/children') 
 export class ChildrenController {
   constructor(private readonly service: ChildrenService) { }
 
-  @UseGuards(JwtAuthGuard) // حطيها هنا
-  @ApiBearerAuth()        // وحطيها هنا
+  @UseGuards(JwtAuthGuard) 
+  @ApiBearerAuth()        
   @Post()
   @ApiOperation({ summary: 'Create child' })
   create(@CurrentUser() user: any, @Body() dto: CreateChildDto) {
@@ -75,25 +68,5 @@ export class ChildrenController {
   @ApiOperation({ summary: 'Delete a child' })
   delete(@CurrentUser() user: any, @Param('id', ParseIntPipe) id: number) {
     return this.service.delete(id, user.userId);
-  }
-
-  // إندبوينت الـ evaluate هتبقى مفتوحة ومريحة في تجارب الـ Audio من غير تعقيد التوكن حالياً
-  @Post('evaluate')
-  @UseInterceptors(FileInterceptor('audio', {
-    storage: diskStorage({
-      destination: './uploads',
-      filename: (req, file, cb) => {
-        const randomName = Array(32).fill(null).map(() => (Math.round(Math.random() * 16)).toString(16)).join('');
-        return cb(null, `${randomName}${extname(file.originalname)}`);
-      },
-    }),
-  }))
-  async evaluate(
-    @UploadedFile() file: Express.Multer.File,
-    @Body('expectedText') expectedText: string,
-  ) {
-    if (!file) throw new BadRequestException('File is missing');
-    console.log('Corrected File Path:', file.path);
-    return await this.service.evaluateSpeech(file.path, expectedText);
   }
 }
